@@ -1,0 +1,38 @@
+{
+  "name": "dataverse-excel-reporter-pptb",
+  "version": "0.1.0",
+  "displayName": "Dataverse Excel Reporter",
+  "description": "This Power Platform ToolBox tool allows you to export Dataverse data using a system or personal excel template from the selected environment. It will properly use pagination and not timeout during data export.",
+  "main": "index.html",
+  "author": "Power Platform ToolBox",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "watch": "vite build --watch",
+    "preview": "vite preview",
+    "finalize-package": "npm shrinkwrap"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "^9.72.7",
+    "@fluentui/react-icons": "^2.0.314",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@pptb/types": "^1.2.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^7.1.11"
+  },
+  "files": [
+    "dist",
+    "npm-shrinkwrap.json"
+  ]
+}
