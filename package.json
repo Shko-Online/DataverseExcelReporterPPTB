@@ -1,5 +1,5 @@
 {
-  "name": "dataverse-excel-reporter-pptb",
+  "name": "@shko.online/dataverse-excel-reporter-pptb",
   "version": "0.1.0",
   "displayName": "Dataverse Excel Reporter",
   "description": "This Power Platform ToolBox tool allows you to export Dataverse data using a system or personal excel template from the selected environment. It will properly use pagination and not timeout during data export.",
@@ -9,11 +9,16 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shko-Online/DataverseExcelReporterPPTB.git"
+  },
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite",
     "watch": "vite build --watch",
     "preview": "vite preview",
+    "test": "echo \"No test specified\" && exit 0",
     "finalize-package": "npm shrinkwrap"
   },
   "dependencies": {
