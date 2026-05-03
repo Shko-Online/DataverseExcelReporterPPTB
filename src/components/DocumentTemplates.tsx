@@ -14,51 +14,69 @@
    limitations under the License.
  */
 
-import { FC, useState } from 'react';
+import { FC, useContext, useMemo, useState } from 'react';
 import { Card, Label, Combobox, useComboboxFilter, useId, ComboboxProps } from '@fluentui/react-components';
 import useDocumentTemplatesStyles from './DocumentTemplates.styles';
-
-const tableOptions = [
-    { value: 'account', children: 'Account (account)' },
-    { value: 'contact', children: 'Contact (contact)' },
-    { value: 'opportunity', children: 'Opportunity (opportunity)' },
-];
-
-const documentOptions = [
-    { value: '0000-0000-00000000-0000', children: 'Account Overview' },
-];
-
-const viewOptions = [
-    { value: '0000-0000-00000000-0000', children: 'All Accounts' },
-];
+import { ApplicationDataContext } from '../context/ApplicationDataContext';
 
 export const DocumentTemplates: FC = () => {
     const styles = useDocumentTemplatesStyles();
     const tableId = useId('table');
     const documentId = useId('document');
     const viewId = useId('view');
+    const { documents, views, tables, isLoading, setSelectedDocument, selectedTable, setSelectedTable, setSelectedView } = useContext(ApplicationDataContext); // Consume context to trigger re-render on data change
+    console.log("Render Document Templates", tables);
+    const tableOptions = useMemo(() => tables.map(table => ({
+        value: table.LogicalName,
+        children: table.toString(),
+        original: table
+    })), [tables]);
+
+    const viewOptions = useMemo(() => selectedTable ? views.filter(view=>view.DataverseTable === selectedTable).map(view => ({
+        value: view.ViewId,
+        children: view.toString(),
+        original: view
+    })) : [], [selectedTable, views]);
+
+    const documentOptions = useMemo(() => selectedTable ? documents.filter(document => document.Table === selectedTable).map(document => ({
+        value: document.TemplateId,
+        children: document.toString(),
+        original: document
+    })) : [], [selectedTable, documents]);
 
     const [tableQuery, setTableQuery] = useState<string>("");
     const tableChildren = useComboboxFilter(tableQuery, tableOptions, {
         noOptionsMessage: "No Tables match your search.",
+        optionToText: (option) => option.original.toString(),
+        
     });
     const onTableOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
+        setSelectedTable(tables.find(table => table.LogicalName == data.optionValue) ?? null);
+        setSelectedDocument(null);
+        setSelectedView(null);
         setTableQuery(data.optionText ?? "");
+        setViewQuery("");
+        setDocumentQuery("");
     };
 
     const [documentQuery, setDocumentQuery] = useState<string>("");
     const documentChildren = useComboboxFilter(documentQuery, documentOptions, {
         noOptionsMessage: "No Document Templates match your search.",
+        optionToText: (option) => option.original.toString()
     });
     const onDocumentOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
+        setSelectedDocument(documents.find(document=>document.TemplateId === data.optionValue)??null);
         setDocumentQuery(data.optionText ?? "");
     };
 
     const [viewQuery, setViewQuery] = useState<string>("");
     const viewChildren = useComboboxFilter(viewQuery, viewOptions, {
         noOptionsMessage: "No Views match your search.",
+        optionToText: (option) => option.original.toString()
     });
     const onViewOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
+        setSelectedView(views.find(view=>view.ViewId === data.optionValue)??null);
+        console.log("selectedView", views.find(view=>view.ViewId === data.optionValue)??null);
         setViewQuery(data.optionText ?? "");
     };
 
@@ -70,6 +88,8 @@ export const DocumentTemplates: FC = () => {
                     <Label htmlFor={tableId}>Table:</Label>
                     <Combobox
                         aria-labelledby={tableId}
+                        clearable
+                        disabled={isLoading}
                         inlinePopup
                         onChange={(ev) => setTableQuery(ev.target.value)}
                         value={tableQuery}
@@ -82,6 +102,8 @@ export const DocumentTemplates: FC = () => {
                     <Label htmlFor={documentId}>Document Template:</Label>
                     <Combobox
                         aria-labelledby={documentId}
+                        clearable
+                        disabled={isLoading || (selectedTable === null)}
                         inlinePopup
                         onChange={(ev) => setDocumentQuery(ev.target.value)}
                         value={documentQuery}
@@ -94,6 +116,8 @@ export const DocumentTemplates: FC = () => {
                     <Label htmlFor={viewId}>View:</Label>
                     <Combobox
                         aria-labelledby={viewId}
+                        clearable
+                        disabled={isLoading || (selectedTable === null)}
                         inlinePopup
                         onChange={(ev) => setViewQuery(ev.target.value)}
                         value={viewQuery}

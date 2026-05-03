@@ -1,0 +1,20 @@
+{
+  "name": "@shko.online/dataverse-excel-reporter-pptb-benchmarks",
+  "version": "1.0.0",
+  "description": "Benchmarks for Dataverse Excel Reporter functionalities",
+  "license": "Apache-2.0",
+  "author": "Shko Online <sales@shko.online>",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx http-server .",
+    "test": "node benchmarks.loader.js"
+  },
+  "devDependencies": {
+    "@types/benchmark": "^2.1.5",
+    "@types/node": "^25.6.0",
+    "benchmark": "^2.1.4",
+    "he": "^1.2.0",
+    "jsdom": "^29.1.0"
+  }
+}

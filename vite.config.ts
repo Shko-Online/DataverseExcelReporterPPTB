@@ -7,6 +7,7 @@ export default defineConfig({
     plugins: [react(), fixHtmlForPPTB()],
     base: './',
     build: {
+        sourcemap: true,
         outDir: 'dist',
         assetsDir: 'assets',
         rollupOptions: {

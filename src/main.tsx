@@ -21,6 +21,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { DataverseAPIProvider } from './context/DataverseAPIContext';
 import { ConnectionProvider } from './context/ConnectionContext';
+import { ApplicationDataProvider } from './context/ApplicationDataContext';
 
 // Ensure DOM is ready and root element exists
 const rootElement = document.getElementById('root');
@@ -33,7 +34,9 @@ if (rootElement && !rootElement.dataset.reactrootInitialized) {
             <ToolboxAPIProvider>
                 <DataverseAPIProvider>
                     <ConnectionProvider>
-                        <App />
+                        <ApplicationDataProvider>
+                            <App />
+                        </ApplicationDataProvider>
                     </ConnectionProvider>
                 </DataverseAPIProvider>
             </ToolboxAPIProvider>

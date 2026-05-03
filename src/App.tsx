@@ -23,6 +23,7 @@ import useAppStyles from './App.styles';
 import { ToolboxAPIContext } from './context/ToolboxAPIContext';
 import ConnectionContext from './context/ConnectionContext';
 import { DocumentTemplates } from './components/DocumentTemplates';
+import { ApplicationDataContext } from './context/ApplicationDataContext';
 
 function App() {
     const { refreshConnection } = useContext(ConnectionContext);
@@ -65,6 +66,8 @@ function App() {
         };
     }, [getTheme, toolboxAPI]);
 
+    const { isGeneratingReport, isLoading, selectedTable, selectedView, selectedDocument, refreshMetadata, generateReport } = useContext(ApplicationDataContext);
+
     return (
         <FluentProvider theme={theme === 'dark' ? webDarkTheme : webLightTheme} className={styles.root}>
             <div className={styles.header}>
@@ -73,15 +76,18 @@ function App() {
             </div>
 
             <Toolbar className={styles.toolbar}>
-                <ToolbarButton icon={<CheckmarkCircle24Regular />} onClick={() => { }}>
-                    Generate Report
-                </ToolbarButton>
-                <ToolbarButton icon={<Warning24Regular />} onClick={() => { }}>
+                {isGeneratingReport ?
+                    <ToolbarButton icon={<DismissCircle24Regular />} onClick={() => { }}>
+                        Stop Report Generation
+                    </ToolbarButton> :
+                    <ToolbarButton disabled={isLoading || selectedTable === null || selectedView === null || selectedDocument === null} icon={<CheckmarkCircle24Regular />} onClick={generateReport}>
+                        Generate Report
+                    </ToolbarButton>
+                }
+                <ToolbarButton disabled={isLoading || isGeneratingReport} icon={<Warning24Regular />} onClick={refreshMetadata}>
                     Refresh Metadata
                 </ToolbarButton>
-                <ToolbarButton icon={<DismissCircle24Regular />} onClick={() => { }}>
-                    Stop Report Generation
-                </ToolbarButton>
+
                 <ToolbarDivider />
                 <ToolbarButton icon={<Info24Regular />} onClick={() => { }}>
                     Batch Size: 100

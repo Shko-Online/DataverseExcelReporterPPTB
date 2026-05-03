@@ -4,8 +4,24 @@
   "displayName": "Dataverse Excel Reporter",
   "description": "This Power Platform ToolBox tool allows you to export Dataverse data using a system or personal excel template from the selected environment. It will properly use pagination and not timeout during data export.",
   "main": "index.html",
-  "author": "Power Platform ToolBox",
-  "license": "MIT",
+  "author": "Shko Online <sales@shko.online>",
+  "contributors": [
+    {
+      "name": "Betim Beja",
+      "url": "https://github.com/BetimBeja"
+    },
+    {
+      "name": "Shko Online",
+      "url": "https://github.com/Shko-Online"
+    }
+  ],
+  "icon": "ShkoOnline.svg",
+  "configurations": {
+    "readmeUrl": "https://raw.githubusercontent.com/Shko-Online/DataverseExcelReporterPPTB/refs/heads/main/README.md",
+    "repository": "https://github.com/Shko-Online/DataverseExcelReporterPPTB",
+    "website": "https://shko.online"
+  },
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -18,6 +34,7 @@
     "dev": "vite",
     "watch": "vite build --watch",
     "preview": "vite preview",
+    "validate": "pptb-validate",
     "test": "echo \"No test specified\" && exit 0",
     "finalize-package": "npm shrinkwrap"
   },
@@ -26,10 +43,11 @@
     "@fluentui/react-icons": "^2.0.314",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "readable-web-to-node-stream": "^5.0.0"
   },
   "devDependencies": {
     "@pptb/types": "^1.2.0",
+    "@types/node": "^25.6.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
