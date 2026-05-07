@@ -24,6 +24,7 @@ import DataverseTable from "../dataModel/DataverseTable";
 import DataverseView from "../dataModel/DataverseView";
 import DocumentTemplate from "../dataModel/DocumentTemplate";
 import getTableViewsFetch from "../queries/getTableViewsFetch";
+import { Workbook } from "@cj-tech-master/excelts";
 
 export interface ApplicationData {
     tables: DataverseTable[];
@@ -60,8 +61,6 @@ export const ApplicationDataContext = createContext<ApplicationData & Applicatio
     generateReport: () => { }
 });
 
-
-
 export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const dataverseApi = useContext(DataverseAPIContext);
     const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +87,16 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             selectedDocument.TemplateId, ["content"]))["content"] as string;
 
         console.log(documentContent);
+
+        const workbook = new Workbook();
+        await workbook.xlsx.load(documentContent, {base64:true});
+
+        console.log(workbook);
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        // const blob = new Blob([], {'type':'application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet'});
+        toolboxAPI?.fileSystem.saveFile('report.xlsx', buffer);
+
         setIsGeneratingReport(false);
     }, [selectedDocument, selectedTable, selectedView, dataverseApi, connection]);
 
