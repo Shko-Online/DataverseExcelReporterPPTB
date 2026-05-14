@@ -4,8 +4,7 @@
         "useDefineForClassFields": true,
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "module": "ESNext",
-        "skipLibCheck": true,
-        "types": ["@pptb/types","node"],
+        "types": ["@pptb/types","node", "@shko.online/pptb-mock", "sinon"],
 
         /* Bundler mode */
         "moduleResolution": "bundler",

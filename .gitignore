@@ -38,3 +38,5 @@ dist/
 # MACOS
 .DS_Store
 ~/
+*storybook.log
+storybook-static

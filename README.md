@@ -1,3 +1,5 @@
+> # Copyright Notice
+>
 > Copyright 2026 Shko Online LLC <sales@shko.online>
 > 
 > Licensed under the Apache License, Version 2.0 (the "License");

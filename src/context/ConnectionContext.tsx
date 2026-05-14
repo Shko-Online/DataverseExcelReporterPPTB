@@ -15,34 +15,37 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import type {FC, ReactNode} from "react";
+import type { FC, ReactNode } from "react";
 import ToolboxAPIContext from "./ToolboxAPIContext";
 
-export const ConnectionContext = createContext<{connection: ToolBoxAPI.DataverseConnection | null, isLoading: boolean, refreshConnection: ()=> Promise<void>}>({connection: null, isLoading:true, refreshConnection: async ()=> {}});
+export const ConnectionContext = createContext<{ connection: ToolBoxAPI.DataverseConnection | null, isLoading: boolean, refreshConnection: () => Promise<void> }>({ connection: null, isLoading: true, refreshConnection: async () => { } });
 
 export const ConnectionProvider: FC<{ children: ReactNode }> = ({ children }) => {
-     const [connection, setConnection] =
-       useState<ToolBoxAPI.DataverseConnection | null>(null);
-     const [isLoading, setIsLoading] = useState(true);
-     const toolboxAPI = useContext(ToolboxAPIContext);
-     const refreshConnection = useCallback(async () => {
-       try {
-         const conn = await toolboxAPI!.connections.getActiveConnection();
-         setConnection(conn);
-       } catch (error) {
-         console.error("Error refreshing connection:", error);
-       } finally {
-         setIsLoading(false);
-       }
-     }, []);
-   
-     useEffect(() => {
-       refreshConnection();
-     }, [refreshConnection]);
-   
-    return <ConnectionContext.Provider 
-                value={{ connection, isLoading, refreshConnection }}
-            >{children}</ConnectionContext.Provider>;
-};  
+  const [connection, setConnection] =
+    useState<ToolBoxAPI.DataverseConnection | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const toolboxAPI = useContext(ToolboxAPIContext);
+  const refreshConnection = useCallback(async () => {
+    if (!toolboxAPI) {
+      return;
+    }
+    try {
+      const conn = await toolboxAPI!.connections.getActiveConnection();
+      setConnection(conn);
+    } catch (error) {
+      console.error("Error refreshing connection:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toolboxAPI]);
+
+  useEffect(() => {
+    refreshConnection();
+  }, [refreshConnection]);
+
+  return <ConnectionContext.Provider
+    value={{ connection, isLoading, refreshConnection }}
+  >{children}</ConnectionContext.Provider>;
+};
 
 export default ConnectionContext;
