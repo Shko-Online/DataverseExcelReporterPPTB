@@ -1,0 +1,245 @@
+{
+    "@odata.context": "https://shko.online.rocks.dynamics.com/api/data/v9.2/$metadata#savedqueries(name,returnedtypecode,fetchxml,savedqueryid)",
+    "@Microsoft.Dynamics.CRM.totalrecordcount": -1,
+    "@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded": false,
+    "@Microsoft.Dynamics.CRM.globalmetadataversion": "3916990",
+    "value": [
+        {
+            "@odata.etag": "W/\"1884162\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"00000000-0000-0000-00aa-000000666000\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><attribute name=\"accountid\" /><order attribute=\"name\" descending=\"false\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account Advanced Find View",
+            "savedqueryid": "00000000-0000-0000-00aa-000000666000"
+        },
+        {
+            "@odata.etag": "W/\"1884167\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"00000000-0000-0000-00aa-000010001001\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"ownerid\" operator=\"eq-userid\" /><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><attribute name=\"accountid\" /><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "My Active Accounts",
+            "savedqueryid": "00000000-0000-0000-00aa-000010001001"
+        },
+        {
+            "@odata.etag": "W/\"1884168\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"00000000-0000-0000-00aa-000010001002\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Active Accounts",
+            "savedqueryid": "00000000-0000-0000-00aa-000010001002"
+        },
+        {
+            "@odata.etag": "W/\"1884184\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"00000000-0000-0000-00aa-000010001031\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"1\" /></filter><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><link-entity alias=\"primaryContactEmailAddress\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Inactive Accounts",
+            "savedqueryid": "00000000-0000-0000-00aa-000010001031"
+        },
+        {
+            "@odata.etag": "W/\"1884189\"",
+            "fetchxml": "<fetch distinct=\"false\" mapping=\"logical\" savedqueryid=\"00000000-0000-0000-00aa-000010001200\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><attribute name=\"accountid\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><order attribute=\"name\" descending=\"false\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account Associated View",
+            "savedqueryid": "00000000-0000-0000-00aa-000010001200"
+        },
+        {
+            "@odata.etag": "W/\"3336569\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"true\" savedqueryid=\"12950dff-f810-f111-8407-000d3aba4179\">\n    <entity name=\"account\">\n        <attribute name=\"name\"/>\n        <attribute name=\"accountid\"/>\n        <link-entity name=\"systemuser\" alias=\"aa\" link-type=\"inner\" from=\"systemuserid\" to=\"createdby\">\n            <filter type=\"and\">\n                <condition attribute=\"fullname\" operator=\"not-null\"/>\n            </filter>\n            <link-entity name=\"businessunit\" alias=\"ec\" link-type=\"inner\" from=\"businessunitid\" to=\"businessunitid\">\n                <filter type=\"and\">\n                    <condition attribute=\"name\" operator=\"not-null\"/>\n                </filter>\n                <link-entity name=\"businessunit\" alias=\"ed\" link-type=\"outer\" from=\"businessunitid\" to=\"parentbusinessunitid\"/>\n            </link-entity>\n        </link-entity>\n        <link-entity name=\"systemuser\" alias=\"ad\" link-type=\"inner\" from=\"systemuserid\" to=\"modifiedby\">\n            <filter type=\"and\">\n                <condition attribute=\"fullname\" operator=\"not-null\"/>\n            </filter>\n            <link-entity name=\"businessunit\" alias=\"ee\" link-type=\"inner\" from=\"businessunitid\" to=\"businessunitid\">\n                <filter type=\"and\">\n                    <condition attribute=\"name\" operator=\"not-null\"/>\n                </filter>\n                <link-entity name=\"businessunit\" alias=\"ef\" link-type=\"outer\" from=\"businessunitid\" to=\"parentbusinessunitid\"/>\n            </link-entity>\n        </link-entity>\n        <link-entity name=\"systemuser\" alias=\"ag\" link-type=\"inner\" from=\"systemuserid\" to=\"owninguser\">\n            <filter type=\"and\">\n                <condition attribute=\"fullname\" operator=\"not-null\"/>\n            </filter>\n            <link-entity name=\"businessunit\" alias=\"eg\" link-type=\"inner\" from=\"businessunitid\" to=\"businessunitid\">\n                <filter type=\"and\">\n                    <condition attribute=\"name\" operator=\"not-null\"/>\n                </filter>\n                <link-entity name=\"businessunit\" alias=\"eh\" link-type=\"outer\" from=\"businessunitid\" to=\"parentbusinessunitid\"/>\n            </link-entity>\n        </link-entity>\n        <link-entity name=\"businessunit\" alias=\"aj\" link-type=\"inner\" from=\"businessunitid\" to=\"owningbusinessunit\">\n            <filter type=\"and\">\n                <condition attribute=\"name\" operator=\"not-null\"/>\n            </filter>\n            <link-entity name=\"businessunit\" alias=\"ei\" link-type=\"outer\" from=\"businessunitid\" to=\"parentbusinessunitid\"/>\n        </link-entity>\n        <link-entity name=\"account\" alias=\"as\" link-type=\"outer\" from=\"accountid\" to=\"parentaccountid\"/>\n        <link-entity name=\"team\" alias=\"at\" link-type=\"outer\" from=\"teamid\" to=\"owningteam\"/>\n        <link-entity name=\"transactioncurrency\" alias=\"dk\" link-type=\"outer\" from=\"transactioncurrencyid\" to=\"transactioncurrencyid\"/>\n        <link-entity name=\"processstage\" alias=\"ds\" link-type=\"outer\" from=\"processstageid\" to=\"stageid\"/>\n        <filter type=\"and\">\n            <condition attribute=\"businessunitid\" operator=\"null\" entityname=\"ed\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"businessunitid\" operator=\"null\" entityname=\"ef\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"businessunitid\" operator=\"null\" entityname=\"eh\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"businessunitid\" operator=\"null\" entityname=\"ei\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"accountid\" operator=\"null\" entityname=\"as\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"teamid\" operator=\"null\" entityname=\"at\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"transactioncurrencyid\" operator=\"null\" entityname=\"dk\"/>\n        </filter>\n        <filter type=\"and\">\n            <condition attribute=\"processstageid\" operator=\"null\" entityname=\"ds\"/>\n        </filter>\n    </entity>\n</fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Join Limit",
+            "savedqueryid": "12950dff-f810-f111-8407-000d3aba4179"
+        },
+        {
+            "@odata.etag": "W/\"1884385\"",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account BulkOperation View",
+            "savedqueryid": "59e57080-0cc2-e211-9b83-00155d89b902"
+        },
+        {
+            "@odata.etag": "W/\"1884457\"",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account List Member View",
+            "savedqueryid": "38a21ffb-4e32-4038-beb9-03172a0dd034"
+        },
+        {
+            "@odata.etag": "W/\"1884721\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"true\" savedqueryid=\"49fb9771-09e1-4e70-b193-198752493577\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"telephone1\" /><link-entity name=\"activityparty\" from=\"partyid\" to=\"accountid\" link-type=\"inner\"><filter type=\"and\"><condition attribute=\"participationtypemask\" operator=\"eq\" value=\"11\" /></filter></link-entity><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Accounts: Responded to Campaigns in Last 6 Months",
+            "savedqueryid": "49fb9771-09e1-4e70-b193-198752493577"
+        },
+        {
+            "@odata.etag": "W/\"1884856\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"51de84dd-732f-440f-a506-26123a19ab50\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"telephone1\" /><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "All Members",
+            "savedqueryid": "51de84dd-732f-440f-a506-26123a19ab50"
+        },
+        {
+            "@odata.etag": "W/\"1885008\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"65ffaf9a-e8c5-432d-860b-32f841b00d87\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"telephone1\" /><attribute name=\"address1_city\" /><attribute name=\"primarycontactid\" /><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><attribute name=\"statecode\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "All Accounts",
+            "savedqueryid": "65ffaf9a-e8c5-432d-860b-32f841b00d87"
+        },
+        {
+            "@odata.etag": "W/\"1885154\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"31089fd8-596a-47be-9c9c-3ff82c7a8f8c\"><entity name=\"account\"><attribute name=\"accountid\" /><filter type=\"and\"><condition attribute=\"ownerid\" operator=\"eq-userid\" /><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "My Accounts",
+            "savedqueryid": "31089fd8-596a-47be-9c9c-3ff82c7a8f8c"
+        },
+        {
+            "@odata.etag": "W/\"1885170\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"4d149ed9-12f1-4cd3-8427-418674f21bed\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"telephone1\" /><filter type=\"or\" isquickfindfields=\"1\"><condition attribute=\"name\" operator=\"like\" value=\"{0}\" /></filter><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Quick Find Marketing List Members",
+            "savedqueryid": "4d149ed9-12f1-4cd3-8427-418674f21bed"
+        },
+        {
+            "@odata.etag": "W/\"1885189\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"2d1187c4-23fe-4bb5-9647-43bb1c6ddbd1\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"accountnumber\" /><attribute name=\"primarycontactid\" /><attribute name=\"address1_city\" /><attribute name=\"telephone1\" /><attribute name=\"emailaddress1\" /><attribute name=\"accountid\" /><order attribute=\"name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><filter type=\"or\" isquickfindfields=\"1\"><condition attribute=\"name\" operator=\"like\" value=\"{0}\" /><condition attribute=\"accountnumber\" operator=\"like\" value=\"{0}\" /><condition attribute=\"emailaddress1\" operator=\"like\" value=\"{0}\" /><condition attribute=\"telephone1\" operator=\"like\" value=\"{0}\" /><condition attribute=\"telephone2\" operator=\"like\" value=\"{0}\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Quick Find Active Accounts",
+            "savedqueryid": "2d1187c4-23fe-4bb5-9647-43bb1c6ddbd1"
+        },
+        {
+            "@odata.etag": "W/\"1885280\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"a424ac61-bec9-48b0-a3e0-4bb903bd186e\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"telephone1\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Active Members",
+            "savedqueryid": "a424ac61-bec9-48b0-a3e0-4bb903bd186e"
+        },
+        {
+            "@odata.etag": "W/\"1885312\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"d9c57fee-71ad-48e2-a17b-4ebbd01ec328\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"telephone1\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"1\" /></filter><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Inactive Members",
+            "savedqueryid": "d9c57fee-71ad-48e2-a17b-4ebbd01ec328"
+        },
+        {
+            "@odata.etag": "W/\"1885340\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"true\" savedqueryid=\"d234426e-1f37-4944-9255-50e19b541c4c\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><link-entity name=\"connection\" from=\"record2id\" to=\"accountid\" alias=\"MyConnections\"><filter type=\"and\"><condition attribute=\"record1id\" operator=\"eq-userid\" /><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></link-entity><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "My Connections",
+            "savedqueryid": "d234426e-1f37-4944-9255-50e19b541c4c"
+        },
+        {
+            "@odata.etag": "W/\"2769226\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"ae46e3cd-9ba0-48bb-8ee3-54d1fe9742d4\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><order attribute=\"shko_name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"1\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Inactive Betim's Tables",
+            "savedqueryid": "ae46e3cd-9ba0-48bb-8ee3-54d1fe9742d4"
+        },
+        {
+            "@odata.etag": "W/\"1885505\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"f9e54d49-0c76-4cbd-979b-5fe94b496be0\"><entity name=\"account\"><attribute name=\"name\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"address1_city\" /><attribute name=\"address1_stateorprovince\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account De-dup lookup display",
+            "savedqueryid": "f9e54d49-0c76-4cbd-979b-5fe94b496be0"
+        },
+        {
+            "@odata.etag": "W/\"1885506\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"f9e54d49-0c76-4cbd-979b-5fe94b496beb\"><entity name=\"account\"><attribute name=\"name\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"emailaddress1\" /><attribute name=\"telephone1\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account multi-line lookup display",
+            "savedqueryid": "f9e54d49-0c76-4cbd-979b-5fe94b496beb"
+        },
+        {
+            "@odata.etag": "W/\"2769294\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" output-format=\"xml-platform\" savedqueryid=\"0eb618ff-2eda-f011-8543-6045bde182da\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /><condition attribute=\"ownerid\" operator=\"eq-userid\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "My Betim's Tables",
+            "savedqueryid": "0eb618ff-2eda-f011-8543-6045bde182da"
+        },
+        {
+            "@odata.etag": "W/\"2769238\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"83cc9f6b-0ef7-4668-837d-75e52396d244\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><order attribute=\"shko_name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Betim's Table Associated View",
+            "savedqueryid": "83cc9f6b-0ef7-4668-837d-75e52396d244"
+        },
+        {
+            "@odata.etag": "W/\"1885962\"",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Accounts: No Orders in Last 6 Months",
+            "savedqueryid": "c147f1f7-1d78-4d10-85bf-7e03b79f74fa"
+        },
+        {
+            "@odata.etag": "W/\"2769262\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"a579778e-7f88-4ec0-84ff-94b9819f19f2\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><order attribute=\"shko_name\" descending=\"false\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Betim's Table Advanced Find View",
+            "savedqueryid": "a579778e-7f88-4ec0-84ff-94b9819f19f2"
+        },
+        {
+            "@odata.etag": "W/\"1886404\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"true\" savedqueryid=\"15c63745-0a6e-4322-8416-a62c84d90279\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><link-entity name=\"connection\" from=\"record2id\" to=\"accountid\" alias=\"DealInfluencer\"></link-entity><attribute name=\"accountid\" /></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Accounts: Influenced Deals That We Won",
+            "savedqueryid": "15c63745-0a6e-4322-8416-a62c84d90279"
+        },
+        {
+            "@odata.etag": "W/\"2769274\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"d4f987eb-51d9-4e1e-8674-b2ae1c749609\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><order attribute=\"shko_name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><filter type=\"or\" isquickfindfields=\"1\"><condition attribute=\"shko_name\" operator=\"like\" value=\"{0}\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Quick Find Active Betim's Tables",
+            "savedqueryid": "d4f987eb-51d9-4e1e-8674-b2ae1c749609"
+        },
+        {
+            "@odata.etag": "W/\"2769250\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"42dc209a-b360-4aed-afdd-bfa374993d2e\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Betim's Table Lookup View",
+            "savedqueryid": "42dc209a-b360-4aed-afdd-bfa374993d2e"
+        },
+        {
+            "@odata.etag": "W/\"1886664\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" savedqueryid=\"cfbcd7af-aee5-4e45-8ecc-c040d4020581\"><entity name=\"account\"><attribute name=\"accountid\" /><attribute name=\"name\" /><attribute name=\"lastusedincampaign\" /><attribute name=\"telephone1\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><filter type=\"or\"><condition attribute=\"lastusedincampaign\" operator=\"olderthan-x-months\" value=\"3\" /><condition attribute=\"lastusedincampaign\" operator=\"null\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Accounts: No Campaign Activities in Last 3 Months",
+            "savedqueryid": "cfbcd7af-aee5-4e45-8ecc-c040d4020581"
+        },
+        {
+            "@odata.etag": "W/\"1886727\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"a9af0ab8-861d-4cfa-92a5-c6281fed7fab\"><entity name=\"account\"><attribute name=\"name\" /><attribute name=\"accountnumber\" /><attribute name=\"primarycontactid\" /><attribute name=\"address1_city\" /><attribute name=\"telephone1\" /><attribute name=\"emailaddress1\" /><attribute name=\"accountid\" /><attribute name=\"fax\" /><attribute name=\"address1_name\" /><attribute name=\"address1_fax\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Account Lookup View",
+            "savedqueryid": "a9af0ab8-861d-4cfa-92a5-c6281fed7fab"
+        },
+        {
+            "@odata.etag": "W/\"2771995\"",
+            "fetchxml": "<fetch version=\"1.0\" mapping=\"logical\" savedqueryid=\"ebffb353-6f5f-4f7a-a125-d004d2eca030\"><entity name=\"shko_betimstable\"><attribute name=\"shko_betimstableid\" /><attribute name=\"shko_name\" /><attribute name=\"createdon\" /><order attribute=\"shko_name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Betim's Table",
+            "returnedtypecode": "shko_betimstable",
+            "name": "Active Betim's Tables",
+            "savedqueryid": "ebffb353-6f5f-4f7a-a125-d004d2eca030"
+        }
+    ]
+}

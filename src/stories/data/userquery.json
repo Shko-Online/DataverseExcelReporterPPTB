@@ -1,0 +1,16 @@
+{
+    "@odata.context": "https://shko.online.rocks.dynamics.com/api/data/v9.2/$metadata#userqueries(name,returnedtypecode,fetchxml,userqueryid)",
+    "@Microsoft.Dynamics.CRM.totalrecordcount": -1,
+    "@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded": false,
+    "@Microsoft.Dynamics.CRM.globalmetadataversion": "3916990",
+    "value": [
+        {
+            "@odata.etag": "W/\"3786501\"",
+            "fetchxml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" no-lock=\"false\" userqueryid=\"7809cf98-9e46-f111-bec7-000d3aba4179\"><entity name=\"account\"><attribute name=\"entityimage_url\" /><attribute name=\"statecode\" /><attribute name=\"name\" /><attribute name=\"address1_city\" /><order attribute=\"name\" descending=\"false\" /><filter type=\"and\"><condition attribute=\"ownerid\" operator=\"eq-userid\" /><condition attribute=\"statecode\" operator=\"eq\" value=\"0\" /></filter><attribute name=\"primarycontactid\" /><attribute name=\"telephone1\" /><attribute name=\"accountid\" /><link-entity alias=\"accountprimarycontactidcontactcontactid\" name=\"contact\" from=\"contactid\" to=\"primarycontactid\" link-type=\"outer\" visible=\"false\"><attribute name=\"emailaddress1\" /></link-entity><link-entity name=\"businessunit\" from=\"businessunitid\" to=\"owningbusinessunit\" link-type=\"outer\" alias=\"a_33c3e4fbfc6643c788afaaaf5a5419df\" visible=\"false\"><attribute name=\"name\" /></link-entity></entity></fetch>",
+            "returnedtypecode@OData.Community.Display.V1.FormattedValue": "Account",
+            "returnedtypecode": "account",
+            "name": "Betim's Accounts",
+            "userqueryid": "7809cf98-9e46-f111-bec7-000d3aba4179"
+        }
+    ]
+}

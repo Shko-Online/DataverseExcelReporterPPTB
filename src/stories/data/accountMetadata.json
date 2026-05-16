@@ -1,0 +1,25 @@
+{
+            "@odata.context": "https://shko.online.rocks.dynamics.com/api/data/v9.2/$metadata#EntityDefinitions(DisplayName,LogicalName,PrimaryIdAttribute,ObjectTypeCode)/$entity",
+            "MetadataId": "70816501-edb9-4740-a16c-6a5efbc05d84",
+            "LogicalName": "account",
+            "ObjectTypeCode": 1,
+            "PrimaryIdAttribute": "accountid",
+            "DisplayName": {
+                "LocalizedLabels": [
+                    {
+                        "Label": "Account",
+                        "LanguageCode": 1033,
+                        "IsManaged": true,
+                        "MetadataId": "2a4901bf-2241-db11-898a-0007e9e17ebd",
+                        "HasChanged": null
+                    }
+                ],
+                "UserLocalizedLabel": {
+                    "Label": "Account",
+                    "LanguageCode": 1033,
+                    "IsManaged": true,
+                    "MetadataId": "2a4901bf-2241-db11-898a-0007e9e17ebd",
+                    "HasChanged": null
+                }
+            }
+        }

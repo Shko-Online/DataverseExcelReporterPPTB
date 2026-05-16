@@ -80,11 +80,14 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             setIsGeneratingReport(false);
             return;
         }
-        const documentContent = (await dataverseApi.retrieve(
+
+        const retrieveResult =await dataverseApi.retrieve(
             selectedDocument.IsPersonal ?
                 "personaldocumenttemplate" :
                 "documenttemplate",
-            selectedDocument.TemplateId, ["content"]))["content"] as string;
+            selectedDocument.TemplateId, ["content"]);
+console.log(retrieveResult);
+        const documentContent = retrieveResult["content"] as string;
 
         console.log(documentContent);
 
@@ -137,6 +140,8 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             dataverseApi.retrieveMultiple(getDocumentTemplateFetch(/* isPersonal */ true).toString()),
             dataverseApi.retrieveMultiple(getDocumentTemplateFetch(/* isPersonal */ false).toString())
         )!;
+        console.log(personalTemplates);
+        console.log(systemTemplates);
         tables.current = new Array();
 
         const documents = personalTemplates.value.map(templateMap).concat(systemTemplates.value.map(templateMap));
@@ -147,8 +152,8 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
 
         // const tableMetadatas = await dataverseApi.queryData(`EntityDefinitions?$select=DisplayName,LogicalName,PrimaryIdAttribute,ObjectTypeCode&$filter=${tables.current.map(table => "LogicalName eq '" + table.LogicalName + "'").join(' or ')}`);
         const tableMetadatas = await toolboxAPI?.utils.executeParallel(...tables.current.map(table => dataverseApi.getEntityMetadata(table.LogicalName, true, ['DisplayName', 'LogicalName', 'PrimaryIdAttribute', 'ObjectTypeCode'])))!;
+        console.log(tableMetadatas);
         tableMetadatas.forEach(tableMetadata => {
-            console.log(tableMetadatas);
             const table = tables.current.find(table => table.LogicalName === tableMetadata.LogicalName);
             if (!table) {
                 return;
@@ -164,6 +169,9 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             dataverseApi.retrieveMultiple(getTableViewsFetch(/* isPersonal */ true, tableEntityCodes).toString()),
             dataverseApi.retrieveMultiple(getTableViewsFetch(/* isPersonal */ false, tableEntityCodes).toString())
         )!;
+
+        console.log(personalViews);
+        console.log(systemViews);
 
         const views = personalViews.value.map(viewMap).concat(systemViews.value.map(viewMap));
         // Sorts an array in place. This method mutates the array 

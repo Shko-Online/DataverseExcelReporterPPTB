@@ -1,40 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DataverseAPIMock, ToolboxAPIMock } from '@shko.online/pptb-mock';
 
 import App from '../App';
 import { ToolboxAPIProvider } from '../context/ToolboxAPIContext';
 import { DataverseAPIProvider } from '../context/DataverseAPIContext';
 import { ConnectionProvider } from '../context/ConnectionContext';
 import { ApplicationDataProvider } from '../context/ApplicationDataContext';
-import { FetchXmlResult } from '@pptb/types/dataverseAPI';
-
-
-const toolboxAPIMock = new ToolboxAPIMock();
-toolboxAPIMock.utils.copyToClipboard.callsFake((text)=>{
-    const clip = new Clipboard();
-    return clip.writeText(text);
-});
-
-toolboxAPIMock.utils.executeParallel.callsFake((...promises)=>{
-    const delay = 500+ 1000*Math.random();
-
-    return new Promise(resolve=>{
-        setTimeout(()=> resolve(Promise.all(promises)), delay) ;
-    }) 
-});
-
-
-const dataverseAPIMock = new DataverseAPIMock();
-
-dataverseAPIMock.retrieveMultiple.callsFake(async(fetchXML:string)=>{
-    console.log(fetchXML);
-    return { 
-        "value": []
-    } as FetchXmlResult;
-})
-
-window.toolboxAPI = toolboxAPIMock;
-window.dataverseAPI = dataverseAPIMock;
+import './mockPPTB';
 
 const WrappedApp = () => (
     <ToolboxAPIProvider>

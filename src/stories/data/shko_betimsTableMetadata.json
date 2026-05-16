@@ -1,0 +1,25 @@
+{
+            "@odata.context": "https://shko.online.rocks.dynamics.com/api/data/v9.2/$metadata#EntityDefinitions(DisplayName,LogicalName,PrimaryIdAttribute,ObjectTypeCode)/$entity",
+            "MetadataId": "2334838a-ddd7-f011-8543-7ced8d4a0dfa",
+            "LogicalName": "shko_betimstable",
+            "ObjectTypeCode": 10575,
+            "PrimaryIdAttribute": "shko_betimstableid",
+            "DisplayName": {
+                "LocalizedLabels": [
+                    {
+                        "Label": "Betim's Table",
+                        "LanguageCode": 1033,
+                        "IsManaged": false,
+                        "MetadataId": "bd41252a-1acb-4f82-9096-cd8d225d8021",
+                        "HasChanged": null
+                    }
+                ],
+                "UserLocalizedLabel": {
+                    "Label": "Betim's Table",
+                    "LanguageCode": 1033,
+                    "IsManaged": false,
+                    "MetadataId": "bd41252a-1acb-4f82-9096-cd8d225d8021",
+                    "HasChanged": null
+                }
+            }
+        }
