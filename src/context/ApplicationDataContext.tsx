@@ -128,7 +128,7 @@ console.log(retrieveResult);
             personalView.returnedtypecode
         ),
         personalView.name,
-        personalView.userquerid ? personalView.userqueryid : personalView.savedqueryid,
+        personalView.userqueryid ? personalView.userqueryid : personalView.savedqueryid,
         personalView.fetchxml
     ), [tables.current]);
 

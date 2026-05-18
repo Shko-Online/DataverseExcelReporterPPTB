@@ -48,7 +48,7 @@ export const DocumentTemplates: FC = () => {
     const tableChildren = useComboboxFilter(tableQuery, tableOptions, {
         noOptionsMessage: "No Tables match your search.",
         optionToText: (option) => option.original.toString(),
-        
+        optionToReactKey: (option) => option.original.LogicalName,
     });
     const onTableOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
         setSelectedTable(tables.find(table => table.LogicalName == data.optionValue) ?? null);
@@ -62,7 +62,8 @@ export const DocumentTemplates: FC = () => {
     const [documentQuery, setDocumentQuery] = useState<string>("");
     const documentChildren = useComboboxFilter(documentQuery, documentOptions, {
         noOptionsMessage: "No Document Templates match your search.",
-        optionToText: (option) => option.original.toString()
+        optionToText: (option) => option.original.toString(),
+        optionToReactKey: (option) => option.original.TemplateId
     });
     const onDocumentOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
         setSelectedDocument(documents.find(document=>document.TemplateId === data.optionValue)??null);
@@ -72,14 +73,17 @@ export const DocumentTemplates: FC = () => {
     const [viewQuery, setViewQuery] = useState<string>("");
     const viewChildren = useComboboxFilter(viewQuery, viewOptions, {
         noOptionsMessage: "No Views match your search.",
-        optionToText: (option) => option.original.toString()
+        optionToText: (option) => option.original.toString(),
+        optionToReactKey: (option) => option.original.ViewId
     });
     const onViewOptionSelect: ComboboxProps["onOptionSelect"] = (_, data) => {
         setSelectedView(views.find(view=>view.ViewId === data.optionValue)??null);
         console.log("selectedView", views.find(view=>view.ViewId === data.optionValue)??null);
         setViewQuery(data.optionText ?? "");
     };
-
+console.log(tableChildren);
+console.log(documentChildren);
+console.log(viewChildren);
     return (
         <Card className={styles.card}>
 
