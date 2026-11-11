@@ -14,119 +14,64 @@
    limitations under the License.
  */
 
-import { FC, useContext } from "react";
-import {
-  Card,
-  CardHeader,
-  Spinner,
-  Text,
-  Badge,
-  tokens,
-} from "@fluentui/react-components";
-import {
-  CheckmarkCircle24Regular,
-  Warning24Regular,
-} from "@fluentui/react-icons";
-import useConnectionStatusStyles from "./ConnectionStatus.styles";
-import ConnectionContext from "../context/ConnectionContext";
+import { useCallback, useContext, useState } from 'react';
+import type { FC } from 'react';
+import { makeStyles, Spinner, tokens, ToolbarButton } from '@fluentui/react-components';
+import { PlugConnected24Regular, PlugDisconnected24Regular } from '@fluentui/react-icons';
+import ConnectionContext from '../context/ConnectionContext';
+import { ConnectionDetailsPopup } from './ConnectionDetailsPopup';
+import EllipsisText from './EllipsisText';
 
-const getEnvironmentColor = (
-    env: string
-  ): "success" | "danger" | "warning" | "important" => {
-    switch (env.toLowerCase()) {
-      case "production":
-        return "danger";
-      case "sandbox":
-        return "warning";
-      default:
-        return "success";
-    }
-  };
+const useConnectionStatusStyles = makeStyles({
+    button: {
+        // Fluent buttons cap their width at 280px and never shrink their label.
+        maxWidth: '100%',
+        minWidth: 0,
+        justifyContent: 'flex-start',
+    },
+    connectedIcon: {
+        color: tokens.colorPaletteGreenForeground2,
+    },
+    disconnectedIcon: {
+        color: tokens.colorPaletteYellowForeground2,
+    },
+    name: {
+        display: 'block',
+        minWidth: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+    },
+});
 
+/**
+ * Toolbar entry showing the active connection name (truncated when it doesn't fit);
+ * clicking it opens the connection details popup.
+ */
 export const ConnectionStatus: FC = () => {
-  const styles = useConnectionStatusStyles();
-  const { connection, isLoading } = useContext(ConnectionContext);
+    const styles = useConnectionStatusStyles();
+    const { connection, isLoading } = useContext(ConnectionContext);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const closeDetails = useCallback(() => setIsDetailsOpen(false), []);
 
-  if (isLoading) {
+    if (isLoading) {
+        return <Spinner size="tiny" label="Checking connection..." />;
+    }
+
+    const label = connection ? connection.name : 'No active connection';
+
     return (
-      <Card className={styles.card}>
-        <CardHeader
-          header={
-            <Text weight="semibold" size={400}>
-              🔗 Connection Status
-            </Text>
-          }
-        />
-        <div className={styles.content}>
-          <Spinner label="Checking connection..." />
-        </div>
-      </Card>
+        <>
+            <ToolbarButton
+                className={styles.button}
+                icon={connection ? <PlugConnected24Regular className={styles.connectedIcon} /> : <PlugDisconnected24Regular className={styles.disconnectedIcon} />}
+                onClick={() => setIsDetailsOpen(true)}
+                aria-label={`Connection: ${label}. Show connection details`}
+                aria-haspopup="dialog"
+            >
+                <EllipsisText className={styles.name} value={label} title={connection ? `${connection.name} (${connection.url})` : label} />
+            </ToolbarButton>
+            {isDetailsOpen && <ConnectionDetailsPopup connection={connection} onClose={closeDetails} />}
+        </>
     );
-  }
-
-  if (!connection) {
-    return (
-      <Card className={styles.card}>
-        <CardHeader
-          header={
-            <Text weight="semibold" size={400}>
-              🔗 Connection Status
-            </Text>
-          }
-        />
-        <div className={styles.content}>
-          <div className={styles.warningBox}>
-            <Warning24Regular />
-            <div>
-              <Text weight="semibold">No active connection</Text>
-              <br />
-              <Text>
-                Please connect to a Dataverse environment to use this tool.
-              </Text>
-            </div>
-          </div>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className={styles.card}>
-      <CardHeader
-        header={
-          <Text weight="semibold" size={400}>
-            🔗 Connection Status
-          </Text>
-        }
-        action={
-          <CheckmarkCircle24Regular
-            color={tokens.colorPaletteGreenForeground2}
-          />
-        }
-      />
-      <div className={styles.content}>
-        <div className={styles.connectionItem}>
-          <Text className={styles.label}>Name:</Text>
-          <Text>{connection.name}</Text>
-        </div>
-        <div className={styles.connectionItem}>
-          <Text className={styles.label}>URL:</Text>
-          <Text>{connection.url}</Text>
-        </div>
-        <div className={styles.connectionItem}>
-          <Text className={styles.label}>Environment:</Text>
-          <Badge
-            appearance="filled"
-            color={getEnvironmentColor(connection.environment)}
-          >
-            {connection.environment}
-          </Badge>
-        </div>
-        <div className={styles.connectionItem}>
-          <Text className={styles.label}>ID:</Text>
-          <Text>{connection.id}</Text>
-        </div>
-      </div>
-    </Card>
-  );
 };

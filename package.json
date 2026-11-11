@@ -35,16 +35,16 @@
     "watch": "vite build --watch",
     "preview": "vite preview",
     "validate": "pptb-validate",
-    "test": "echo \"No test specified\" && exit 0",
+    "test": "vitest run",
     "finalize-package": "npm shrinkwrap",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@cj-tech-master/excelts": "^9.4.2",
     "@fluentui/react-components": "^9.72.7",
     "@fluentui/react-icons": "^2.0.314",
     "node-api-dotnet": "^0.9.19",
+    "openxmlsdkts": "^1.0.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -64,7 +64,8 @@
     "storybook": "^10.4.0",
     "ts-jest": "^29.4.9",
     "typescript": "^5.6.3",
-    "vite": "^7.1.11"
+    "vite": "^7.1.11",
+    "vitest": "^3.2.4"
   },
   "type": "module",
   "files": [

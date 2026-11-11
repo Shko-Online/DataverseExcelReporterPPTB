@@ -43,6 +43,25 @@ const useAppStyles = makeStyles({
     toolbar: {
         borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
         padding: tokens.spacingVerticalS,
+        flexWrap: 'wrap',
+        alignItems: 'center',
+    },
+    pageSize: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalS,
+        paddingLeft: tokens.spacingHorizontalS,
+        paddingRight: tokens.spacingHorizontalS,
+    },
+    pageSizeInput: {
+        width: '96px',
+    },
+    connection: {
+        // Takes the remaining toolbar space and truncates the connection name;
+        // wraps to its own line only when less than the minimum width is left.
+        display: 'flex',
+        flex: '1 1 0',
+        minWidth: '120px',
     },
     content: {
         flex: 1,
@@ -51,20 +70,6 @@ const useAppStyles = makeStyles({
         display: 'flex',
         flexDirection: 'column',
         gap: tokens.spacingVerticalL,
-    },
-    topRowContainer: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: tokens.spacingVerticalL,
-        alignItems: 'stretch',
-    },
-    connectionStatus: {
-        minHeight: '0',
-        height: '100%',
-    },
-    toolboxApi: {
-        minHeight: '0',
-        height: '100%',
     },
 });
 

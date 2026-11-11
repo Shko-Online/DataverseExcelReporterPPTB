@@ -24,7 +24,17 @@ import DataverseTable from "../dataModel/DataverseTable";
 import DataverseView from "../dataModel/DataverseView";
 import DocumentTemplate from "../dataModel/DocumentTemplate";
 import getTableViewsFetch from "../queries/getTableViewsFetch";
-import { Workbook } from "@cj-tech-master/excelts";
+import { DEFAULT_PAGE_SIZE, generateExcelReport } from "../services/report/ExcelReportGenerator";
+
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/** Report_<Table>_yyyyMMdd_HHmmss.xlsx, like the XrmToolBox tool. */
+const getReportFileName = (template: DocumentTemplate) => {
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const tableName = template.Table.Name.replace(/[\\/:*?"<>|]/g, "_");
+    return `Report_${tableName}_${timestamp}.xlsx`;
+};
 
 export interface ApplicationData {
     tables: DataverseTable[];
@@ -35,6 +45,10 @@ export interface ApplicationData {
     selectedView: DataverseView | null;
     isLoading: boolean;
     isGeneratingReport: boolean;
+    /** Number of records exported so far by the running report generation. */
+    exportedRecords: number;
+    /** Records retrieved per request. */
+    pageSize: number;
 }
 
 export interface ApplicationActions {
@@ -43,6 +57,8 @@ export interface ApplicationActions {
     setSelectedTable: (selectedTable: DataverseTable | null) => void;
     setSelectedView: (selectedView: DataverseView | null) => void;
     generateReport: () => void;
+    stopReportGeneration: () => void;
+    setPageSize: (pageSize: number) => void;
 }
 
 export const ApplicationDataContext = createContext<ApplicationData & ApplicationActions>({
@@ -54,11 +70,15 @@ export const ApplicationDataContext = createContext<ApplicationData & Applicatio
     selectedView: null,
     isGeneratingReport: false,
     isLoading: true,
+    exportedRecords: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
     refreshMetadata: () => Promise.resolve(),
     setSelectedDocument: () => { },
     setSelectedTable: () => { },
     setSelectedView: () => { },
-    generateReport: () => { }
+    generateReport: () => { },
+    stopReportGeneration: () => { },
+    setPageSize: () => { },
 });
 
 export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -73,41 +93,61 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
     const tables = useRef<ApplicationData['tables']>([]);
     const toolboxAPI = useContext(ToolboxAPIContext);
     const { connection } = useContext(ConnectionContext);
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+    const [exportedRecords, setExportedRecords] = useState(0);
+    const reportAbortController = useRef<AbortController | null>(null);
+
+    const stopReportGeneration = useCallback(() => {
+        reportAbortController.current?.abort();
+    }, []);
 
     const generateReport = useCallback(async () => {
-        setIsGeneratingReport(true);
-        if (selectedDocument === null || dataverseApi === null) {
-            setIsGeneratingReport(false);
+        if (selectedDocument === null || selectedView === null || dataverseApi === null || reportAbortController.current) {
             return;
         }
-
-        const retrieveResult =await dataverseApi.retrieve(
-            selectedDocument.IsPersonal ?
-                "personaldocumenttemplate" :
-                "documenttemplate",
-            selectedDocument.TemplateId, ["content"]);
-console.log(retrieveResult);
-        const documentContent = retrieveResult["content"] as string;
-
-        console.log(documentContent);
-
-        const workbook = new Workbook();
-        await workbook.xlsx.load(documentContent, {base64:true});
-
-        console.log(workbook);
-
-        const buffer = await workbook.xlsx.writeBuffer();
-        // const blob = new Blob([], {'type':'application/vnd.openxmlformatsofficedocument.spreadsheetml.sheet'});
-        toolboxAPI?.fileSystem.saveFile('report.xlsx', buffer);
-
-        setIsGeneratingReport(false);
-    }, [selectedDocument, selectedTable, selectedView, dataverseApi, connection]);
+        const abortController = new AbortController();
+        reportAbortController.current = abortController;
+        setIsGeneratingReport(true);
+        setExportedRecords(0);
+        try {
+            const { content, recordCount } = await generateExcelReport({
+                dataverseApi,
+                template: selectedDocument,
+                view: selectedView,
+                pageSize,
+                signal: abortController.signal,
+                onProgress: setExportedRecords,
+            });
+            const savedPath = await toolboxAPI?.fileSystem.saveFile(getReportFileName(selectedDocument), content, [{ name: "Excel Workbook", extensions: ["xlsx"] }]);
+            if (savedPath) {
+                await toolboxAPI?.utils.showNotification({
+                    title: "Report saved",
+                    body: `Exported ${recordCount} records to ${savedPath}.`,
+                    type: "success",
+                });
+            }
+        } catch (error) {
+            if (abortController.signal.aborted) {
+                await toolboxAPI?.utils.showNotification({ title: "Report generation stopped", body: "The report generation was cancelled.", type: "warning" });
+            } else {
+                console.error("Error generating report:", error);
+                await toolboxAPI?.utils.showNotification({
+                    title: "Error generating the report",
+                    body: error instanceof Error ? error.message : String(error),
+                    type: "error",
+                });
+            }
+        } finally {
+            reportAbortController.current = null;
+            setIsGeneratingReport(false);
+        }
+    }, [selectedDocument, selectedView, dataverseApi, pageSize, toolboxAPI]);
 
     const templateMap = useCallback((personalTemplate: any) => new DocumentTemplate(
         personalTemplate.personaldocumenttemplateid ? true : false,
         DataverseTable.GetOrCreate(
             tables.current,
-            personalTemplate['associatedentitytpecode@OData.Community.Display.V1.FormattedValue'],
+            personalTemplate['associatedentitytypecode@OData.Community.Display.V1.FormattedValue'],
             personalTemplate.associatedentitytypecode
         ),
         personalTemplate.clientdata,
@@ -196,6 +236,8 @@ console.log(retrieveResult);
         value={{
             isGeneratingReport,
             isLoading,
+            exportedRecords,
+            pageSize,
             documents,
             selectedDocument,
             tables: tables.current,
@@ -206,7 +248,9 @@ console.log(retrieveResult);
             setSelectedDocument,
             setSelectedTable,
             setSelectedView,
-            generateReport
+            generateReport,
+            stopReportGeneration,
+            setPageSize,
         }}
     >{children}</ApplicationDataContext.Provider>;
 };

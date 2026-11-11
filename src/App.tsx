@@ -15,15 +15,16 @@
  */
 
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, Title3, Text, ToolbarDivider } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, Title3, Text, ToolbarDivider, Label, SpinButton, Spinner, useId } from '@fluentui/react-components';
+import type { SpinButtonProps } from '@fluentui/react-components';
 import { CheckmarkCircle24Regular, Info24Regular, Warning24Regular, DismissCircle24Regular } from '@fluentui/react-icons';
 import { ConnectionStatus } from './components/ConnectionStatus';
-import { ShkoOnlineAd } from './components/ShkoOnlineAd';
 import useAppStyles from './App.styles';
 import { ToolboxAPIContext } from './context/ToolboxAPIContext';
 import ConnectionContext from './context/ConnectionContext';
 import { DocumentTemplates } from './components/DocumentTemplates';
 import { ApplicationDataContext } from './context/ApplicationDataContext';
+import { MAX_PAGE_SIZE, MIN_PAGE_SIZE } from './services/report/ExcelReportGenerator';
 
 function App() {
     const { refreshConnection } = useContext(ConnectionContext);
@@ -66,7 +67,15 @@ function App() {
         };
     }, [getTheme, toolboxAPI]);
 
-    const { isGeneratingReport, isLoading, selectedTable, selectedView, selectedDocument, refreshMetadata, generateReport } = useContext(ApplicationDataContext);
+    const { isGeneratingReport, isLoading, selectedTable, selectedView, selectedDocument, exportedRecords, pageSize, refreshMetadata, generateReport, stopReportGeneration, setPageSize } = useContext(ApplicationDataContext);
+    const pageSizeId = useId('pageSize');
+
+    const onPageSizeChange: SpinButtonProps['onChange'] = (_, data) => {
+        const value = data.value ?? (data.displayValue !== undefined ? parseInt(data.displayValue, 10) : NaN);
+        if (Number.isFinite(value)) {
+            setPageSize(Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, Math.trunc(value as number))));
+        }
+    };
 
     return (
         <FluentProvider theme={theme === 'dark' ? webDarkTheme : webLightTheme} className={styles.root}>
@@ -77,7 +86,7 @@ function App() {
 
             <Toolbar className={styles.toolbar}>
                 {isGeneratingReport ?
-                    <ToolbarButton icon={<DismissCircle24Regular />} onClick={() => { }}>
+                    <ToolbarButton icon={<DismissCircle24Regular />} onClick={stopReportGeneration}>
                         Stop Report Generation
                     </ToolbarButton> :
                     <ToolbarButton disabled={isLoading || selectedTable === null || selectedView === null || selectedDocument === null} icon={<CheckmarkCircle24Regular />} onClick={generateReport}>
@@ -89,24 +98,33 @@ function App() {
                 </ToolbarButton>
 
                 <ToolbarDivider />
-                <ToolbarButton icon={<Info24Regular />} onClick={() => { }}>
-                    Batch Size: 100
-                </ToolbarButton>
+                <div className={styles.pageSize}>
+                    <Info24Regular />
+                    <Label htmlFor={pageSizeId}>Batch Size:</Label>
+                    <SpinButton
+                        id={pageSizeId}
+                        className={styles.pageSizeInput}
+                        value={pageSize}
+                        min={MIN_PAGE_SIZE}
+                        max={MAX_PAGE_SIZE}
+                        disabled={isGeneratingReport}
+                        onChange={onPageSizeChange}
+                    />
+                </div>
+                <ToolbarDivider />
+                <div className={styles.connection}>
+                    <ConnectionStatus />
+                </div>
+                {isGeneratingReport && (
+                    <>
+                        <ToolbarDivider />
+                        <Spinner size="tiny" label={`Exported ${exportedRecords} records`} />
+                    </>
+                )}
             </Toolbar>
 
             <div className={styles.content}>
-                <div className={styles.topRowContainer}>
-                    <div className={styles.connectionStatus}>
-                        <ConnectionStatus />
-                    </div>
-
-                    <div className={styles.toolboxApi}>
-                        <ShkoOnlineAd />
-                    </div>
-                </div>
-
                 <DocumentTemplates />
-
             </div>
         </FluentProvider>
     );
