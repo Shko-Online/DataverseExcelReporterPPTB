@@ -30,15 +30,51 @@ const useAppStyles = makeStyles({
         borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'baseline',
         gap: tokens.spacingVerticalXXS,
     },
     headerTitle: {
-        textOverflow: 'ellipsis'
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'baseline',
+        columnGap: tokens.spacingHorizontalM,
+        rowGap: tokens.spacingVerticalXXS,
+        minWidth: '0',
+    },
+    titleGroup: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalM,
+        flexShrink: 0,
+        '@media (max-width: 640px)': {
+            flexShrink: 1,
+            minWidth: '0',
+        },
+    },
+    headerIcon: {
+        width: '28px',
+        height: '28px',
+        flexShrink: 0,
+    },
+    title: {
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        '@media (max-width: 640px)': {
+            flexShrink: 1,
+            minWidth: '0',
+            whiteSpace: 'normal',
+        },
     },
     subtitle: {
         color: tokens.colorNeutralForeground3,
         fontSize: tokens.fontSizeBase300,
+        // Stays next to the title only when the whole sentence fits there (flex-basis auto = its
+        // single-line width); otherwise it moves below the title and wraps over the full width.
+        flex: '1 1 auto',
+        minWidth: '0',
+        display: '-webkit-box',
+        WebkitLineClamp: '4',
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
     },
     toolbar: {
         borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,

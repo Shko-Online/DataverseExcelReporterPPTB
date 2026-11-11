@@ -15,10 +15,11 @@
  */
 
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, Title3, Text, ToolbarDivider, Label, SpinButton, Spinner, useId } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, Title3, ToolbarDivider, Label, SpinButton, Spinner, useId } from '@fluentui/react-components';
 import type { SpinButtonProps } from '@fluentui/react-components';
 import { CheckmarkCircle24Regular, Info24Regular, Warning24Regular, DismissCircle24Regular } from '@fluentui/react-icons';
 import { ConnectionStatus } from './components/ConnectionStatus';
+import EllipsisText from './components/EllipsisText';
 import useAppStyles from './App.styles';
 import { ToolboxAPIContext } from './context/ToolboxAPIContext';
 import ConnectionContext from './context/ConnectionContext';
@@ -80,8 +81,16 @@ function App() {
     return (
         <FluentProvider theme={theme === 'dark' ? webDarkTheme : webLightTheme} className={styles.root}>
             <div className={styles.header}>
-                <Title3 className={styles.headerTitle}>Dataverse Excel Reporter</Title3>
-                <Text className={styles.subtitle}>A tool that allows you to export Dataverse data using a system or personal excel template from the selected environment. It will properly use pagination and not timeout during data export.</Text>
+                <div className={styles.headerTitle}>
+                    <div className={styles.titleGroup}>
+                        <img className={styles.headerIcon} src="/DataverseExcelReporter.svg" alt="" />
+                        <Title3 className={styles.title}>Dataverse Excel Reporter</Title3>
+                    </div>
+                    <EllipsisText
+                        className={styles.subtitle}
+                        value="Export Dataverse data using a system or personal Excel template from the selected environment, with pagination so large exports never time out."
+                    />
+                </div>
             </div>
 
             <Toolbar className={styles.toolbar}>
