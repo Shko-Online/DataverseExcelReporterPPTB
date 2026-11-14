@@ -137,12 +137,14 @@ export class ReportQuery {
      * @param page 1-based page number.
      * @param pageSize Number of records per page (1 - 5000).
      * @param pagingCookie The (decoded) paging cookie returned by the previous page, if any.
+     * @param returnTotalRecordCount Asks Dataverse for the total number of matching records (counted up to 5000).
      */
-    public toFetchXml(page: number, pageSize: number, pagingCookie?: string | null): string {
+    public toFetchXml(page: number, pageSize: number, pagingCookie?: string | null, returnTotalRecordCount = false): string {
         const fetchElement = this.fetch.root!;
         fetchElement.setAttributeValue("count", String(pageSize));
         fetchElement.setAttributeValue("page", String(page));
         fetchElement.setAttributeValue("paging-cookie", pagingCookie ?? null);
+        fetchElement.setAttributeValue("returntotalrecordcount", returnTotalRecordCount ? "true" : null);
         return fetchElement.toString();
     }
 

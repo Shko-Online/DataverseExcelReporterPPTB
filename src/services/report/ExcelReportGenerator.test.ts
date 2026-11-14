@@ -24,6 +24,7 @@ import DocumentTemplate from "../../dataModel/DocumentTemplate";
 import systemTemplate1 from "../../stories/data/systemTemplate1.json";
 import systemTemplates from "../../stories/data/systemTemplates.json";
 import { generateExcelReport } from "./ExcelReportGenerator";
+import type { ReportProgress } from "./ReportProgress";
 
 const FORMATTED = "@OData.Community.Display.V1.FormattedValue";
 const PRIMARY_CONTACT_RELATIONSHIP = "7befeabe-bf01-4207-97f8-7a96e05d2332";
@@ -60,14 +61,17 @@ const createRecord = (index: number) => ({
     [`statecode${FORMATTED}`]: "Active",
 });
 
-const createDataverseApi = (totalRecords: number, pageSize: number) => {
+const createDataverseApi = (totalRecords: number, pageSize: number, countLimit = 5000) => {
     const records = Array.from({ length: totalRecords }, (_, i) => createRecord(i + 1));
     const retrieveMultiple = vi.fn(async (fetchXml: string) => {
         const page = parseInt(/page='(\d+)'/.exec(fetchXml)![1], 10);
         const value = records.slice((page - 1) * pageSize, page * pageSize);
         const moreRecords = page * pageSize < totalRecords;
+        const countRequested = fetchXml.includes("returntotalrecordcount='true'");
         return {
             value,
+            "@Microsoft.Dynamics.CRM.totalrecordcount": countRequested ? Math.min(totalRecords, countLimit) : -1,
+            "@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded": countRequested && totalRecords > countLimit,
             "@Microsoft.Dynamics.CRM.morerecords": moreRecords,
             ...(moreRecords ? { "@Microsoft.Dynamics.CRM.fetchxmlpagingcookie": `<cookie pagenumber="${page + 1}" pagingcookie="%253ccookie%2520page%253d%2522${page}%2522%253e%253c%252fcookie%253e" istracking="False" />` } : {}),
         };
@@ -135,15 +139,26 @@ describe("generateExcelReport", () => {
     it("fills Table1 with every page of records", async () => {
         const { template, view } = createTemplate();
         const dataverseApi = createDataverseApi(5, 2);
-        const progress: number[] = [];
+        const progress: ReportProgress[] = [];
 
-        const result = await generateExcelReport({ dataverseApi, template, view, pageSize: 2, onProgress: (count) => progress.push(count) });
+        const result = await generateExcelReport({ dataverseApi, template, view, pageSize: 2, onProgress: (update) => progress.push(update) });
 
         expect(result.recordCount).toBe(5);
-        expect(progress).toEqual([2, 4, 5]);
+        expect(progress.map(({ phase, exportedRecords, pagesRetrieved }) => [phase, exportedRecords, pagesRetrieved])).toEqual([
+            ["template", 0, 0],
+            ["metadata", 0, 0],
+            ["records", 0, 0],
+            ["records", 2, 1],
+            ["records", 4, 2],
+            ["records", 5, 3],
+            ["workbook", 5, 3],
+        ]);
+        expect(progress[3]).toMatchObject({ totalRecords: 5, totalIsLowerBound: false });
         expect(dataverseApi.retrieveMultiple).toHaveBeenCalledTimes(3);
         const [firstQuery, secondQuery] = dataverseApi.retrieveMultiple.mock.calls.map(([fetchXml]) => fetchXml);
         expect(firstQuery).not.toContain("paging-cookie");
+        expect(firstQuery).toContain("returntotalrecordcount='true'");
+        expect(secondQuery).not.toContain("returntotalrecordcount");
         expect(XElement.parse(secondQuery).attribute("paging-cookie")?.value).toBe('<cookie page="1"></cookie>');
         expect(secondQuery).toContain("<condition attribute='statecode' operator='eq' value='0' />");
 
@@ -207,11 +222,22 @@ describe("generateExcelReport", () => {
             view,
             pageSize: 2,
             signal: controller.signal,
-            onProgress: (count) => count >= 4 && controller.abort(),
+            onProgress: ({ exportedRecords }) => exportedRecords >= 4 && controller.abort(),
         });
 
         await expect(generation).rejects.toMatchObject({ name: "AbortError" });
         expect(dataverseApi.retrieveMultiple).toHaveBeenCalledTimes(2);
+    });
+
+    it("reports a lower bound when there are more records than Dataverse counts", async () => {
+        const { template, view } = createTemplate();
+        const dataverseApi = createDataverseApi(7, 3, /* countLimit */ 5);
+        const progress: ReportProgress[] = [];
+
+        await generateExcelReport({ dataverseApi, template, view, pageSize: 3, onProgress: (update) => progress.push(update) });
+
+        expect(progress.find((update) => update.pagesRetrieved === 1)).toMatchObject({ totalRecords: 5, totalIsLowerBound: true });
+        expect(progress.at(-1)).toMatchObject({ phase: "workbook", exportedRecords: 7, totalRecords: 7, totalIsLowerBound: false });
     });
 
     it("honours the view's top attribute", async () => {
@@ -219,9 +245,12 @@ describe("generateExcelReport", () => {
         view.FetchXml = view.FetchXml.replace("<fetch ", '<fetch top="3" ');
         const dataverseApi = createDataverseApi(10, 2);
 
-        const result = await generateExcelReport({ dataverseApi, template, view, pageSize: 2 });
+        const progress: ReportProgress[] = [];
+
+        const result = await generateExcelReport({ dataverseApi, template, view, pageSize: 2, onProgress: (update) => progress.push(update) });
 
         expect(result.recordCount).toBe(3);
+        expect(progress.find((update) => update.pagesRetrieved === 1)).toMatchObject({ totalRecords: 3, totalIsLowerBound: false });
         expect(dataverseApi.retrieveMultiple).toHaveBeenCalledTimes(2);
     });
 });

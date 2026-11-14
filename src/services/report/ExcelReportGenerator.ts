@@ -23,6 +23,8 @@ import { parseCellRange } from "../excel/cellReference";
 import { getCellContent, getRowVersion } from "./cellValue";
 import { CHECKSUM_LOGICAL_NAME, ReportQuery, extractPagingCookie, getReferencedRelationshipIds, parseRelatedColumn } from "./ReportQuery";
 import type { ManyToOneRelationship } from "./ReportQuery";
+import { TOTAL_RECORD_COUNT_LIMIT, createReportProgress } from "./ReportProgress";
+import type { ReportProgress } from "./ReportProgress";
 
 /** Name of the Excel table Dataverse puts the data in. */
 export const DATA_TABLE_NAME = "Table1";
@@ -40,8 +42,8 @@ export interface GenerateReportOptions {
     pageSize: number;
     /** Aborts the generation between two requests. */
     signal?: AbortSignal;
-    /** Called after every page with the total number of exported records. */
-    onProgress?: (exportedRecords: number) => void;
+    /** Called when the generation moves to another phase and after every page of records. */
+    onProgress?: (progress: ReportProgress) => void;
 }
 
 export interface GenerateReportResult {
@@ -61,6 +63,23 @@ interface ColumnPlan {
 }
 
 const clampPageSize = (pageSize: number) => (Number.isFinite(pageSize) ? Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, Math.trunc(pageSize))) : DEFAULT_PAGE_SIZE);
+
+/**
+ * Reads the `@Microsoft.Dynamics.CRM.totalrecordcount` annotations of the first page.
+ * Dataverse counts up to 5000 records and returns -1 when the count was not requested.
+ */
+const getTotalRecords = (result: Record<string, unknown>, top: number | null): Pick<ReportProgress, "totalRecords" | "totalIsLowerBound"> => {
+    const count = result["@Microsoft.Dynamics.CRM.totalrecordcount"];
+    const limitExceeded = result["@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded"] === true;
+    if (typeof count !== "number" || count < 0) {
+        return { totalRecords: top, totalIsLowerBound: false };
+    }
+    if (limitExceeded) {
+        const lowerBound = count > 0 ? count : TOTAL_RECORD_COUNT_LIMIT;
+        return top !== null && top <= lowerBound ? { totalRecords: top, totalIsLowerBound: false } : { totalRecords: lowerBound, totalIsLowerBound: true };
+    }
+    return { totalRecords: top === null ? count : Math.min(count, top), totalIsLowerBound: false };
+};
 
 const getAttributeTypes = async (dataverseApi: DataverseAPI.API, table: string): Promise<Map<string, string>> => {
     try {
@@ -87,6 +106,12 @@ export const generateExcelReport = async ({ dataverseApi, template, view, pageSi
         throw new Error(`The document template '${template.Name}' does not contain column definitions.`);
     }
     const effectivePageSize = clampPageSize(pageSize);
+    const progress = createReportProgress("template");
+    const report = (changes: Partial<ReportProgress>) => {
+        Object.assign(progress, changes);
+        onProgress?.({ ...progress });
+    };
+    report({});
 
     const retrieveResult = await dataverseApi.retrieve(template.IsPersonal ? "personaldocumenttemplate" : "documenttemplate", template.TemplateId, ["content"]);
     const content = retrieveResult["content"];
@@ -94,6 +119,7 @@ export const generateExcelReport = async ({ dataverseApi, template, view, pageSi
         throw new Error(`The document template '${template.Name}' has no content.`);
     }
     signal?.throwIfAborted();
+    report({ phase: "metadata" });
 
     const tableLogicalName = template.Table.LogicalName;
     const hasRelatedColumns = getReferencedRelationshipIds(clientData).length > 0;
@@ -148,11 +174,15 @@ export const generateExcelReport = async ({ dataverseApi, template, view, pageSi
     let page = 1;
     let pagingCookie: string | null = null;
     let moreRecords = true;
+    report({ phase: "records" });
 
     while (moreRecords) {
         signal?.throwIfAborted();
-        const result = await dataverseApi.retrieveMultiple(query.toFetchXml(page, effectivePageSize, pagingCookie));
+        const result = await dataverseApi.retrieveMultiple(query.toFetchXml(page, effectivePageSize, pagingCookie, /* returnTotalRecordCount */ page === 1));
         signal?.throwIfAborted();
+        if (page === 1) {
+            Object.assign(progress, getTotalRecords(result as unknown as Record<string, unknown>, query.top));
+        }
 
         let records = result.value;
         if (query.top !== null && exported + records.length > query.top) {
@@ -176,7 +206,7 @@ export const generateExcelReport = async ({ dataverseApi, template, view, pageSi
             rowIndex++;
         }
         exported += records.length;
-        onProgress?.(exported);
+        report({ exportedRecords: exported, pagesRetrieved: page });
 
         const moreRecordsAnnotation = (result as unknown as Record<string, unknown>)["@Microsoft.Dynamics.CRM.morerecords"];
         moreRecords =
@@ -187,6 +217,9 @@ export const generateExcelReport = async ({ dataverseApi, template, view, pageSi
         page++;
     }
 
+    report({ phase: "workbook", totalRecords: exported, totalIsLowerBound: false });
+    // Let the UI render the new phase before the (synchronous) packaging work starts.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     table.commit();
     signal?.throwIfAborted();
 

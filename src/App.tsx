@@ -15,17 +15,20 @@
  */
 
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, Title3, ToolbarDivider, Label, SpinButton, Spinner, useId } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme, webDarkTheme, Toolbar, ToolbarButton, ToolbarToggleButton, Title3, ToolbarDivider, Label, SpinButton, Spinner, ProgressBar, MessageBar, MessageBarBody, MessageBarActions, Button, useId } from '@fluentui/react-components';
 import type { SpinButtonProps } from '@fluentui/react-components';
-import { CheckmarkCircle24Regular, Info24Regular, Warning24Regular, DismissCircle24Regular } from '@fluentui/react-icons';
+import { CheckmarkCircle24Regular, Info24Regular, Warning24Regular, DismissCircle24Regular, Games24Regular, Dismiss20Regular } from '@fluentui/react-icons';
 import { ConnectionStatus } from './components/ConnectionStatus';
 import EllipsisText from './components/EllipsisText';
 import useAppStyles from './App.styles';
 import { ToolboxAPIContext } from './context/ToolboxAPIContext';
 import ConnectionContext from './context/ConnectionContext';
 import { DocumentTemplates } from './components/DocumentTemplates';
+import { RecentReports } from './components/RecentReports';
 import { ApplicationDataContext } from './context/ApplicationDataContext';
 import { MAX_PAGE_SIZE, MIN_PAGE_SIZE } from './services/report/ExcelReportGenerator';
+import { formatRecordProgress, getOverallFraction, getPhaseLabel } from './services/report/ReportProgress';
+import { Minigames } from './minigames/Minigames';
 
 function App() {
     const { refreshConnection } = useContext(ConnectionContext);
@@ -68,8 +71,24 @@ function App() {
         };
     }, [getTheme, toolboxAPI]);
 
-    const { isGeneratingReport, isLoading, selectedTable, selectedView, selectedDocument, exportedRecords, pageSize, refreshMetadata, generateReport, stopReportGeneration, setPageSize } = useContext(ApplicationDataContext);
+    const { isGeneratingReport, isLoading, selectedTable, selectedView, selectedDocument, reportProgress, pageSize, refreshMetadata, generateReport, stopReportGeneration, setPageSize } = useContext(ApplicationDataContext);
     const pageSizeId = useId('pageSize');
+    const [showMinigames, setShowMinigames] = useState(false);
+    const [minigameInviteDismissed, setMinigameInviteDismissed] = useState(false);
+
+    // Offer the minigames again for every new report.
+    useEffect(() => {
+        if (isGeneratingReport) {
+            setMinigameInviteDismissed(false);
+        }
+    }, [isGeneratingReport]);
+
+    const progressFraction = reportProgress ? getOverallFraction(reportProgress) : null;
+    const progressLabel = reportProgress
+        ? reportProgress.phase === 'records'
+            ? `Exported ${formatRecordProgress(reportProgress)}`
+            : getPhaseLabel(reportProgress.phase)
+        : '';
 
     const onPageSizeChange: SpinButtonProps['onChange'] = (_, data) => {
         const value = data.value ?? (data.displayValue !== undefined ? parseInt(data.displayValue, 10) : NaN);
@@ -93,7 +112,11 @@ function App() {
                 </div>
             </div>
 
-            <Toolbar className={styles.toolbar}>
+            <Toolbar
+                className={styles.toolbar}
+                checkedValues={{ minigames: showMinigames ? ['open'] : [] }}
+                onCheckedValueChange={(_, data) => data.name === 'minigames' && setShowMinigames(data.checkedItems.includes('open'))}
+            >
                 {isGeneratingReport ?
                     <ToolbarButton icon={<DismissCircle24Regular />} onClick={stopReportGeneration}>
                         Stop Report Generation
@@ -124,16 +147,56 @@ function App() {
                 <div className={styles.connection}>
                     <ConnectionStatus />
                 </div>
-                {isGeneratingReport && (
+                <ToolbarToggleButton
+                    name="minigames"
+                    value="open"
+                    appearance="subtle"
+                    icon={<Games24Regular />}
+                >
+                    Minigames
+                </ToolbarToggleButton>
+                {isGeneratingReport && reportProgress && (
                     <>
                         <ToolbarDivider />
-                        <Spinner size="tiny" label={`Exported ${exportedRecords} records`} />
+                        <Spinner
+                            size="tiny"
+                            label={progressFraction === null ? progressLabel : `${progressLabel} (${Math.floor(progressFraction * 100)}%)`}
+                        />
                     </>
                 )}
             </Toolbar>
+            {isGeneratingReport && (
+                <ProgressBar
+                    className={styles.progressBar}
+                    thickness="large"
+                    value={progressFraction ?? undefined}
+                    aria-label={progressLabel}
+                />
+            )}
 
             <div className={styles.content}>
+                {isGeneratingReport && !showMinigames && !minigameInviteDismissed && (
+                    <MessageBar intent="info" icon={<Games24Regular />}>
+                        <MessageBarBody>
+                            Large report? Play a minigame while you wait. The games follow the real export progress.
+                        </MessageBarBody>
+                        <MessageBarActions
+                            containerAction={
+                                <Button
+                                    appearance="transparent"
+                                    aria-label="Dismiss"
+                                    icon={<Dismiss20Regular />}
+                                    onClick={() => setMinigameInviteDismissed(true)}
+                                />
+                            }
+                        >
+                            <Button onClick={() => setShowMinigames(true)}>Play a minigame</Button>
+                        </MessageBarActions>
+                    </MessageBar>
+                )}
+                {showMinigames && <Minigames onClose={() => setShowMinigames(false)} />}
                 <DocumentTemplates />
+                <RecentReports />
             </div>
         </FluentProvider>
     );

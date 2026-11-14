@@ -99,6 +99,9 @@ const useAppStyles = makeStyles({
         flex: '1 1 0',
         minWidth: '120px',
     },
+    progressBar: {
+        flexShrink: 0,
+    },
     content: {
         flex: 1,
         overflow: 'auto',

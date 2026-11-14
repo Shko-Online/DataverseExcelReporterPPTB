@@ -25,6 +25,12 @@ import DataverseView from "../dataModel/DataverseView";
 import DocumentTemplate from "../dataModel/DocumentTemplate";
 import getTableViewsFetch from "../queries/getTableViewsFetch";
 import { DEFAULT_PAGE_SIZE, generateExcelReport } from "../services/report/ExcelReportGenerator";
+import { createReportProgress } from "../services/report/ReportProgress";
+import type { ReportPhase, ReportProgress } from "../services/report/ReportProgress";
+import { addRecentReport, createReportId, removeRecentReport, setReportSavedPath } from "../dataModel/GeneratedReport";
+import type { GeneratedReport } from "../dataModel/GeneratedReport";
+
+const EXCEL_FILTERS = [{ name: "Excel Workbook", extensions: ["xlsx"] }];
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -45,8 +51,13 @@ export interface ApplicationData {
     selectedView: DataverseView | null;
     isLoading: boolean;
     isGeneratingReport: boolean;
-    /** Number of records exported so far by the running report generation. */
-    exportedRecords: number;
+    /**
+     * Progress of the running report generation, or the outcome of the last one
+     * (`completed`, `cancelled` or `failed`). Null until a report is generated.
+     */
+    reportProgress: ReportProgress | null;
+    /** The last generated reports (newest first), kept in memory until the tool is closed or they are removed. */
+    generatedReports: GeneratedReport[];
     /** Records retrieved per request. */
     pageSize: number;
 }
@@ -59,6 +70,12 @@ export interface ApplicationActions {
     generateReport: () => void;
     stopReportGeneration: () => void;
     setPageSize: (pageSize: number) => void;
+    /** Opens the save dialog for a previously generated report. */
+    saveGeneratedReport: (id: string) => Promise<void>;
+    /** Copies the path a generated report was saved to. */
+    copyGeneratedReportPath: (id: string) => Promise<void>;
+    removeGeneratedReport: (id: string) => void;
+    clearGeneratedReports: () => void;
 }
 
 export const ApplicationDataContext = createContext<ApplicationData & ApplicationActions>({
@@ -70,7 +87,8 @@ export const ApplicationDataContext = createContext<ApplicationData & Applicatio
     selectedView: null,
     isGeneratingReport: false,
     isLoading: true,
-    exportedRecords: 0,
+    reportProgress: null,
+    generatedReports: [],
     pageSize: DEFAULT_PAGE_SIZE,
     refreshMetadata: () => Promise.resolve(),
     setSelectedDocument: () => { },
@@ -79,6 +97,10 @@ export const ApplicationDataContext = createContext<ApplicationData & Applicatio
     generateReport: () => { },
     stopReportGeneration: () => { },
     setPageSize: () => { },
+    saveGeneratedReport: () => Promise.resolve(),
+    copyGeneratedReportPath: () => Promise.resolve(),
+    removeGeneratedReport: () => { },
+    clearGeneratedReports: () => { },
 });
 
 export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -94,8 +116,60 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
     const toolboxAPI = useContext(ToolboxAPIContext);
     const { connection } = useContext(ConnectionContext);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-    const [exportedRecords, setExportedRecords] = useState(0);
+    const [reportProgress, setReportProgress] = useState<ReportProgress | null>(null);
     const reportAbortController = useRef<AbortController | null>(null);
+    const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
+    // Lets the callbacks read the current list without being recreated on every change.
+    const generatedReportsRef = useRef(generatedReports);
+    generatedReportsRef.current = generatedReports;
+
+    const updateGeneratedReports = useCallback((update: (reports: GeneratedReport[]) => GeneratedReport[]) => {
+        generatedReportsRef.current = update(generatedReportsRef.current);
+        setGeneratedReports(generatedReportsRef.current);
+    }, []);
+
+    /** Shows the save dialog for a report; returns the chosen path, or null when the dialog was cancelled. */
+    const saveReport = useCallback(async (report: GeneratedReport) => {
+        const savedPath = await toolboxAPI?.fileSystem.saveFile(report.savedPath ?? report.fileName, report.content, EXCEL_FILTERS);
+        if (savedPath) {
+            updateGeneratedReports((reports) => setReportSavedPath(reports, report.id, savedPath));
+            await toolboxAPI?.utils.showNotification({
+                title: "Report saved",
+                body: `Exported ${report.recordCount} records to ${savedPath}.`,
+                type: "success",
+            });
+        }
+        return savedPath ?? null;
+    }, [toolboxAPI, updateGeneratedReports]);
+
+    const saveGeneratedReport = useCallback(async (id: string) => {
+        const report = generatedReportsRef.current.find((candidate) => candidate.id === id);
+        if (!report) {
+            return;
+        }
+        try {
+            await saveReport(report);
+        } catch (error) {
+            console.error("Error saving the report:", error);
+            await toolboxAPI?.utils.showNotification({
+                title: "Error saving the report",
+                body: error instanceof Error ? error.message : String(error),
+                type: "error",
+            });
+        }
+    }, [saveReport, toolboxAPI]);
+
+    const copyGeneratedReportPath = useCallback(async (id: string) => {
+        const savedPath = generatedReportsRef.current.find((report) => report.id === id)?.savedPath;
+        if (!savedPath) {
+            return;
+        }
+        await toolboxAPI?.utils.copyToClipboard(savedPath);
+        await toolboxAPI?.utils.showNotification({ title: "Path copied", body: savedPath, type: "info" });
+    }, [toolboxAPI]);
+
+    const removeGeneratedReport = useCallback((id: string) => updateGeneratedReports((reports) => removeRecentReport(reports, id)), [updateGeneratedReports]);
+    const clearGeneratedReports = useCallback(() => updateGeneratedReports(() => []), [updateGeneratedReports]);
 
     const stopReportGeneration = useCallback(() => {
         reportAbortController.current?.abort();
@@ -108,7 +182,8 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
         const abortController = new AbortController();
         reportAbortController.current = abortController;
         setIsGeneratingReport(true);
-        setExportedRecords(0);
+        setReportProgress(createReportProgress("template"));
+        const setPhase = (phase: ReportPhase) => setReportProgress((progress) => ({ ...(progress ?? createReportProgress()), phase }));
         try {
             const { content, recordCount } = await generateExcelReport({
                 dataverseApi,
@@ -116,17 +191,33 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
                 view: selectedView,
                 pageSize,
                 signal: abortController.signal,
-                onProgress: setExportedRecords,
+                onProgress: setReportProgress,
             });
-            const savedPath = await toolboxAPI?.fileSystem.saveFile(getReportFileName(selectedDocument), content, [{ name: "Excel Workbook", extensions: ["xlsx"] }]);
-            if (savedPath) {
+            // Keep the report before saving it: even if the save dialog is cancelled it can be saved later from the list.
+            const report: GeneratedReport = {
+                id: createReportId(),
+                fileName: getReportFileName(selectedDocument),
+                content,
+                recordCount,
+                tableName: selectedDocument.Table.Name,
+                templateName: selectedDocument.Name,
+                viewName: selectedView.Name,
+                generatedOn: new Date(),
+                savedPath: null,
+            };
+            updateGeneratedReports((reports) => addRecentReport(reports, report));
+            setPhase("saving");
+            const savedPath = await saveReport(report);
+            setPhase("completed");
+            if (!savedPath) {
                 await toolboxAPI?.utils.showNotification({
-                    title: "Report saved",
-                    body: `Exported ${recordCount} records to ${savedPath}.`,
-                    type: "success",
+                    title: "Report not saved",
+                    body: `${report.fileName} is kept in Recent reports: you can save it from there until you close the tool.`,
+                    type: "info",
                 });
             }
         } catch (error) {
+            setPhase(abortController.signal.aborted ? "cancelled" : "failed");
             if (abortController.signal.aborted) {
                 await toolboxAPI?.utils.showNotification({ title: "Report generation stopped", body: "The report generation was cancelled.", type: "warning" });
             } else {
@@ -141,7 +232,7 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             reportAbortController.current = null;
             setIsGeneratingReport(false);
         }
-    }, [selectedDocument, selectedView, dataverseApi, pageSize, toolboxAPI]);
+    }, [selectedDocument, selectedView, dataverseApi, pageSize, toolboxAPI, saveReport, updateGeneratedReports]);
 
     const templateMap = useCallback((personalTemplate: any) => new DocumentTemplate(
         personalTemplate.personaldocumenttemplateid ? true : false,
@@ -236,7 +327,8 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
         value={{
             isGeneratingReport,
             isLoading,
-            exportedRecords,
+            reportProgress,
+            generatedReports,
             pageSize,
             documents,
             selectedDocument,
@@ -251,6 +343,10 @@ export const ApplicationDataProvider: FC<{ children: ReactNode }> = ({ children 
             generateReport,
             stopReportGeneration,
             setPageSize,
+            saveGeneratedReport,
+            copyGeneratedReportPath,
+            removeGeneratedReport,
+            clearGeneratedReports,
         }}
     >{children}</ApplicationDataContext.Provider>;
 };

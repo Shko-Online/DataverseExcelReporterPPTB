@@ -49,9 +49,28 @@ Choose the **Document Template** that defines the report layout, and the **View*
 
 ### 3. Generate the report
 
-Optionally change the **Batch Size** (records per request, 100 by default), then click **Generate Report**. The toolbar shows how many records have been exported so far, and **Stop Report Generation** cancels the export. When it completes, choose where to save the file.
+Optionally change the **Batch Size** (records per request, 100 by default), then click **Generate Report**. The toolbar shows how many records have been exported so far out of the total (Dataverse counts up to 5,000; larger views show `5,000+`), and **Stop Report Generation** cancels the export. When it completes, choose where to save the file.
 
 ![Report generation in progress](https://raw.githubusercontent.com/Shko-Online/DataverseExcelReporterPPTB/refs/heads/main/docs/04.generating-report.png)
+
+### Recent reports
+
+The last 5 reports you generate are listed under **Recent reports** until you close the tool or remove them (**Remove** on a report, or **Clear list**). Each one keeps its generated file in memory, so you can **Save** it if you cancelled the save dialog, or **Save a copy** elsewhere, without generating it again. **Copy path** copies where it was saved. Removing a report from the list doesn't delete the saved file.
+
+### Minigames (optional)
+
+Waiting for a large export? Click **Minigames** in the toolbar (or **Play a minigame** when a report starts) to play one of two small games. Both follow the real report progress:
+
+- **Attack of the #N/As**: shoot down the invading Excel errors (`#N/A`, `#REF!`, `#DIV/0!`...). Every batch of records drops a power-up crate (AutoFill, Rapid Recalc, Ctrl+Z, Freeze Panes, Protected Sheet), and you get a bonus when the report is delivered. The longer you survive, the higher the threat level: the errors dive and shoot faster, and moving **Merged Cells** shields start protecting them from your shots.
+- **Row-d Rage**: ride a motorcycle through traffic on Pagination Highway. Every batch of records is a checkpoint that refills your nitro (close calls refill a little too), roadside signs mark the progress, and a finish line appears when the report is ready. The longer you ride, the higher the traffic level: denser traffic, more drivers changing lanes (watch out for the striped lane hoppers), and oversized loads that take two or even three lanes.
+
+The games fit any window shape without stretching: a wide window gets a wider highway (up to 6 lanes) and a wider formation of errors, a tall one gives you more time to see what's coming. Click **Full screen** (or press **F**) to expand the game over the whole tool area; **Esc** or the button in the corner brings you back. Press **T** (or click **T · Controls** in the corner of the game) to show or hide the controls over the game, handy in full screen. The status at the top of the game pulses when the report is ready or when no report is running, so you don't miss it.
+
+Both games follow the ToolBox theme: in dark mode the errors invade deep space and the ride happens at night; in light mode the battle takes place on a sunny worksheet and the ride in daylight.
+
+The idea of playing while waiting comes from Docentric's [Work Hard, Play Hard: The Docentric Game Corner in D365FO](https://ax.docentric.com/work-hard-play-hard-the-docentric-game-corner-in-d365fo/), which lets users play small games while a bulk attachment upload runs.
+
+The high score, time played and games played of each game are stored in the tool settings on your computer only. The games pause when you click elsewhere, so the save dialog never costs you a life.
 
 ### 4. Open the report
 

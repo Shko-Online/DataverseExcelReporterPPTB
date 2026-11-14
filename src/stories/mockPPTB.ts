@@ -10,8 +10,17 @@ import systemTemplates from './data/systemTemplates.json';
 import personalViews from './data/userquery.json';
 import { applyLinkEntityAliases, sampleAttributes, sampleRecords, sampleRelationships } from './data/sampleRecords';
 
+/** Tweaks of the mocked environment that stories can change. */
+export const mockOptions = {
+    /** Simulated duration of every page of records, in milliseconds. */
+    pageDelayMs: 300,
+    /** Theme returned by the ToolBox. */
+    theme: 'light' as 'light' | 'dark',
+};
+
 const toolboxAPIMock = new ToolboxAPIMock();
 const dataverseAPIMock = new DataverseAPIMock();
+toolboxAPIMock.utils.getCurrentTheme.callsFake(async () => mockOptions.theme);
 const parser = new DOMParser();
 
 dataverseAPIMock.retrieveMultiple.callsFake(async (fetchXML: string) => {
@@ -34,9 +43,10 @@ dataverseAPIMock.retrieveMultiple.callsFake(async (fetchXML: string) => {
         const page = parseInt(fetchNode.getAttribute('page') ?? '1', 10);
         const records = sampleRecords[entity];
         const moreRecords = page * count < records.length;
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, mockOptions.pageDelayMs));
         return {
             value: applyLinkEntityAliases(records.slice((page - 1) * count, page * count), entityNode!),
+            ...(fetchNode.getAttribute('returntotalrecordcount') === 'true' ? { '@Microsoft.Dynamics.CRM.totalrecordcount': records.length, '@Microsoft.Dynamics.CRM.totalrecordcountlimitexceeded': false } : {}),
             '@Microsoft.Dynamics.CRM.morerecords': moreRecords,
             ...(moreRecords ? { '@Microsoft.Dynamics.CRM.fetchxmlpagingcookie': `<cookie pagenumber="${page + 1}" pagingcookie="%253ccookie%2520page%253d%2522${page}%2522%253e%253c%252fcookie%253e" istracking="False" />` } : {}),
         };

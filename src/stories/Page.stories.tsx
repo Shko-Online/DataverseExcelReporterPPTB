@@ -5,7 +5,7 @@ import { ToolboxAPIProvider } from '../context/ToolboxAPIContext';
 import { DataverseAPIProvider } from '../context/DataverseAPIContext';
 import { ConnectionProvider } from '../context/ConnectionContext';
 import { ApplicationDataProvider } from '../context/ApplicationDataContext';
-import './mockPPTB';
+import { mockOptions } from './mockPPTB';
 
 const WrappedApp = () => (
     <ToolboxAPIProvider>
@@ -32,7 +32,23 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const FullTool: Story = {};
+export const FullTool: Story = {
+    beforeEach: () => {
+        mockOptions.pageDelayMs = 300;
+        mockOptions.theme = 'light';
+    },
+};
+
+/** Every page of records takes 1.5 seconds: long enough to try the minigames while the report is generated. */
+export const SlowReportWithMinigames: Story = {
+    beforeEach: () => {
+        mockOptions.pageDelayMs = 1500;
+        mockOptions.theme = 'light';
+        return () => {
+            mockOptions.pageDelayMs = 300;
+        };
+    },
+};
 
 // // More on component testing: https://storybook.js.org/docs/writing-tests/interaction-testing
 // export const LoggedIn: Story = {
@@ -47,3 +63,15 @@ export const FullTool: Story = {};
 //     await expect(logoutButton).toBeInTheDocument();
 //   },
 // };
+
+/** Same as {@link SlowReportWithMinigames}, with the ToolBox in dark mode. */
+export const SlowReportWithMinigamesDark: Story = {
+    beforeEach: () => {
+        mockOptions.pageDelayMs = 1500;
+        mockOptions.theme = 'dark';
+        return () => {
+            mockOptions.pageDelayMs = 300;
+            mockOptions.theme = 'light';
+        };
+    },
+};

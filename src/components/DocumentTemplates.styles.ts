@@ -20,6 +20,8 @@ const useDocumentTemplatesStyles = makeStyles({
     card: {
         maxWidth: '100%',
         width: '100%',
+        // Don't shrink when other cards (recent reports, minigames) share the scrolling content area.
+        flexShrink: 0,
     },
     content: {
         padding: tokens.spacingVerticalM,
